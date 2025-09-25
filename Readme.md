@@ -4,6 +4,51 @@ This repository contains IaC scripts and Kubernetes manifests for deploying the 
 
 ---
 
+├── terraform/                   # Terraform infrastructure code
+|   ├──.terraform/modules
+|       ├──eks
+|       ├── eks.kms
+|       ├── vpc
+|       ├── modules. json
+│   ├── main.tf              # EKS + VPC core resources
+│   ├── variables.tf         # Input variables (subnets, cluster name, region)
+│   ├── outputs.tf           # Terraform outputs (cluster info, VPC ID, etc.)
+│   ├── provider.tf          # AWS provider + backend config
+|   ├── Iam.tf
+|   ├── ACM.tf
+|   ├──dynamodb.tf
+|   ├── eks.tf
+|   ├── rds.tf
+│   └── vpc.tf               # VPC, subnets, IGW, route tables
+│
+├──k8s/                  # Kubernetes manifests
+|   ├── DBS/          # App deployments & services
+│   │   ├── Mysql-deployment.yaml
+│   │   ├── Redis-deployment.yaml
+│   │   ├── postgres-deployment.yaml
+│   │   ├── rabbitmq-deployment.yaml
+│   ├── deployments/          # App deployments & services
+│   │   ├── carts.yaml
+│   │   ├── orders.yaml
+│   │   ├── ui.yaml
+│   │   ├── inventory.yaml
+|   ├── namespace.yaml       # Kubernetes namespace definition
+├──ingress
+│   ├── alb.ingress.yaml         # Ingress resource for ALB
+├──services
+│   ├──cart-svc.yaml
+|   ├──catalog-svc.yaml
+|   ├──orders-svc.yaml
+|   ├──ui-svc.yaml
+│   └── namespace.yaml
+├──deployment.sh
+├──.gitignore
+├── GitHub/workflows
+|    ├── terraform-deploy.yaml
+├── iam_policy.json          # IAM policy for ALB controller
+└── README.md                # Documentation (this file)
+
+---
 ## 🚀 Features
 - EKS Cluster provisioning with `eksctl`
 - NodeGroup creation (scalable worker nodes)
@@ -33,11 +78,12 @@ Ensure the following tools are installed and configured:
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/<your-repo>/project-bedrock.git
+git clone https://github.com/Iziik/project-bedrock.git
 cd project-bedrock
 ````
 
 ### 2. Create EKS Cluster with `eksctl`
+Run ```./deployment.sh```
 
 ```bash
 eksctl create cluster \
@@ -72,7 +118,7 @@ eksctl create iamserviceaccount \
   --namespace kube-system \
   --name aws-load-balancer-controller \
   --role-name AWSLoadBalancerControllerRole \
-  --attach-policy-arn arn:aws:iam::<YOUR_ACCOUNT_ID>:policy/AWSLoadBalancerControllerIAMPolicy \
+  --attach-policy-arn arn:aws:iam::ACCOUNT-ID:policy/AWSLoadBalancerControllerIAMPolicy \
   --approve
 
 helm upgrade -i aws-load-balancer-controller eks/aws-load-balancer-controller \
@@ -81,18 +127,18 @@ helm upgrade -i aws-load-balancer-controller eks/aws-load-balancer-controller \
   --set serviceAccount.create=false \
   --set serviceAccount.name=aws-load-balancer-controller
 ```
+REPLACE *ACCOUNT-ID* 
 
 ### 5. Deploy Application
 
 ```bash
-kubectl apply -f k8s/
+kubectl apply -f https://github.com/aws-containers/retail-store-sample-app/releases/latest/download/kubernetes-manifests.yaml
 ```
 
 This deploys:
 
 * Deployments (`orders`, `carts`, `inventory`, `ui`)
 * Services (`ClusterIP` / `NodePort`)
-* Ingress (via ALB)
 
 ### 6. Configure Route 53
 
