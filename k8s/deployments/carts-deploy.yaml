@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: carts
+  namespace: retail
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: carts
+  template:
+    metadata:
+      labels:
+        app: carts
+    spec:
+      containers:
+        - name: carts
+          image: public.ecr.aws/aws-containers/retail-store-sample-carts:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: CARTS_TABLE
+              valueFrom:
+                secretKeyRef:
+                  name: carts-dynamodb-credentials
+                  key: tableName
