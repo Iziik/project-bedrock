@@ -1,8 +1,3 @@
-Got it ✅ — here’s a **ready-to-use `README.md` file** for your repo since you deployed with **eksctl**:
-
----
-
-````markdown
 # Project Bedrock – Retail Store App on AWS EKS
 
 This repository contains IaC scripts and Kubernetes manifests for deploying the **Retail Store Sample Application** (codenamed **Project Bedrock**) onto **Amazon Elastic Kubernetes Service (EKS)** using `eksctl`.
